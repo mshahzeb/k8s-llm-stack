@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webui
+  namespace: k8s-llm-stack
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: webui
+  template:
+    metadata:
+      labels:
+        name: webui
+    spec:
+      volumes:
+      - hostPath:
+          path: /opt/webui
+          type: DirectoryOrCreate
+        name: webui-storage
+      containers:
+        - name: webui
+          image: ghcr.io/open-webui/open-webui:main
+          volumeMounts:
+          - mountPath: /app/backend/data
+            name: webui-storage
+          env:
+            - name: OLLAMA_BASE_URLS
+              value: "http://localhost:30434"
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webui
+  namespace: k8s-llm-stack
+spec:
+  type: NodePort
+  selector:
+    name: webui
+  ports:
+  - port: 8080
+    nodePort: 30080
+    name: http
+    targetPort: 8080
+    protocol: TCP

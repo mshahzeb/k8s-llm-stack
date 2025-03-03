@@ -33,13 +33,13 @@ spec:
           protocol: TCP
         env:
         - name: PRELOAD_MODELS
-          value: "llama3.1"
+          value: "llama3.1 deepseek-r1"
         - name: OLLAMA_KEEP_ALIVE
           value: "12h"
         lifecycle:
           postStart:
             exec:
-              command: ["/bin/sh", "-c", "for model in $PRELOAD_MODELS; do ollama run $model \"\"; done"]
+              command: ["/bin/sh", "-c", "for model in ${PRELOAD_MODELS}; do echo \"Loading model: $model\" && ollama pull $model && ollama run $model \"\"; done"]
       volumes:
       - name: ollama-storage
         hostPath:
@@ -57,7 +57,7 @@ spec:
     name: ollama
   ports:
   - port: 11434
+    nodePort: 30434
     name: http
     targetPort: 11434
-    nodePort: 31434
     protocol: TCP
