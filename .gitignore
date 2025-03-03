@@ -1,0 +1,46 @@
+# Ignore sensitive Kubernetes files
+*.kubeconfig
+*.kube
+kubeconfig.yaml
+kubeconfig.yml
+
+# Ignore temporary files
+*.swp
+*.bak
+*.tmp
+*.log
+
+# Ignore Kubernetes secrets (if stored locally)
+secrets.yaml
+secrets.yml
+*.secrets
+*.crt
+*.key
+*.pem
+*.enc
+
+# Ignore Helm-related files
+charts/
+*.tgz
+values.yaml
+values.yml
+helm-release.yaml
+.helm/
+
+# Ignore Terraform state files (if using Terraform for K8s)
+*.tfstate
+*.tfstate.backup
+
+# Ignore kustomize build artifacts
+kustomize_build/
+kustomization-build.yaml
+kustomization-build.yml
+
+# Ignore kubeconfig cache
+~/.kube/cache
+~/.kube/http-cache
+
+# Ignore backup files
+*.orig
+*.bak
+*.backup
