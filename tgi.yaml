@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tgi
+  namespace: k8s-llm-stack
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: tgi
+  template:
+    metadata:
+      labels:
+        name: tgi
+    spec:
+      runtimeClassName: nvidia
+      containers:
+      - name: tgi
+        image: ghcr.io/huggingface/text-generation-inference:latest
+        args:
+        - --model-id
+        - HuggingFaceTB/SmolLM2-135M-Instruct
+        - --cuda-memory-fraction
+        - "0.5"
+        resources:
+          requests:
+            memory: "4Gi"
+            ephemeral-storage: "10Gi"
+          limits:
+            memory: "8Gi"
+            ephemeral-storage: "20Gi"
+        volumeMounts:
+          - mountPath: /data
+            name: tgi-storage
+        ports:
+        - name: http
+          containerPort: 80
+          protocol: TCP
+      volumes:
+      - name: tgi-storage
+        hostPath:
+          path: /opt/tgi
+          type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tgi
+  namespace: k8s-llm-stack
+spec:
+  type: NodePort
+  selector:
+    name: tgi
+  ports:
+  - port: 80
+    nodePort: 30180
+    name: http
+    targetPort: 80
+    protocol: TCP 

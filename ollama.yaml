@@ -32,10 +32,12 @@ spec:
           containerPort: 11434
           protocol: TCP
         env:
+        - name: OLLAMA_MAX_LOADED_MODELS
+          value: "1"
         - name: PRELOAD_MODELS
-          value: "llama3.1 deepseek-r1"
+          value: "llama3.2:1b"
         - name: OLLAMA_KEEP_ALIVE
-          value: "12h"
+          value: "1h"
         lifecycle:
           postStart:
             exec:
