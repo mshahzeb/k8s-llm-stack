@@ -1,59 +1,64 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: tgi
+  name: vllm
   namespace: k8s-llm-stack
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: tgi
+      name: vllm
   template:
     metadata:
       labels:
-        name: tgi
+        name: vllm
     spec:
       runtimeClassName: nvidia
       containers:
-      - name: tgi
-        image: ghcr.io/huggingface/text-generation-inference:latest
+      - name: vllm
+        image: vllm/vllm-openai:latest
         args:
-        - --model-id
+        - --model
         - HuggingFaceTB/SmolLM2-135M-Instruct
-        - --cuda-memory-fraction
+        - --dtype
+        - half
+        - --gpu-memory-utilization
         - "0.25"
         resources:
           requests:
-            memory: "4Gi"
+            memory: "12Gi"
             ephemeral-storage: "10Gi"
           limits:
-            memory: "8Gi"
+            memory: "16Gi"
             ephemeral-storage: "20Gi"
+        env:
+        - name: VLLM_PORT
+          value: "8000"
         volumeMounts:
-          - mountPath: /data
-            name: tgi-storage
+          - mountPath: /root/.cache/huggingface
+            name: hf-cache
         ports:
         - name: http
-          containerPort: 80
+          containerPort: 8000
           protocol: TCP
       volumes:
-      - name: tgi-storage
+      - name: hf-cache
         hostPath:
-          path: /opt/tgi
+          path: /opt/huggingface-cache
           type: DirectoryOrCreate
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: tgi
+  name: vllm
   namespace: k8s-llm-stack
 spec:
   type: NodePort
   selector:
-    name: tgi
+    name: vllm
   ports:
-  - port: 80
-    nodePort: 30180
+  - port: 8000
+    nodePort: 30280
     name: http
-    targetPort: 80
+    targetPort: 8000
     protocol: TCP 
